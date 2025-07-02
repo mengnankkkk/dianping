@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mengnankk.mapper.PermissionMapper">
+
+    <resultMap id="permissionResultMap" type="com.mengnankk.entity.Permission">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <select id="findByName" resultMap="permissionResultMap">
+        SELECT id, name FROM permissions WHERE name = #{name}
+    </select>
+
+    <select id="findAll" resultMap="permissionResultMap">
+        SELECT id, name FROM permissions
+    </select>
+
+    <insert id="insertPermission" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO permissions (name) VALUES (#{name})
+    </insert>
+
+    <select id="findPermissionsByRoleId" resultMap="permissionResultMap">
+        SELECT p.id, p.name FROM permissions p
+        JOIN role_permissions rp ON p.id = rp.permission_id
+        WHERE rp.role_id = #{roleId}
+    </select>
+
+</mapper>

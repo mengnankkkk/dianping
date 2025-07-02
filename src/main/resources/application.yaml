@@ -1,0 +1,77 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: hmdp
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/dianping?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    lettuce:
+      pool:
+        max-active: 30
+        max-idle: 15
+        min-idle: 5
+        time-between-eviction-runs: 10s
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  jackson:
+    default-property-inclusion: non_null # JSON处理时忽略非空字段
+  security:
+    crypto:
+      password:
+        encode: bcrypt
+# MyBatis-Plus 配置
+mybatis-plus:
+  type-aliases-package: com.mengnankk.entity
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+# JWT 配置
+jwt:
+  secret: wYyNGj56rUdw9XDAf2Uz3T2X3fOaAS7WXplQzhZoEmU=
+  access-token-expiration-ms: 900000         # 15 分钟
+  refresh-token-expiration-ms: 604800000     # 7 天
+
+# 短信验证码配置
+sms:
+  code:
+    expiration-seconds: 300 # 5分钟
+
+# 阿里云短信配置
+aliyun:
+  sms:
+    access-key-id: your_aliyun_access_key_id
+    access-key-secret: your_aliyun_access_key_secret
+    region-id: cn-hangzhou
+    sign-name: 您的短信签名
+    template-code-register: 您的注册模板Code
+    template-code-reset-password: 您的重置密码模板Code
+
+# Bloom Filter 配置
+bloomfilter:
+  expected-insertions: 1000000
+  false-positive-probability: 0.001
+
+
+
+# 日志配置
+logging:
+  file:
+    name: logs/auth-system.log
+  level:
+    com.mengnankk: debug
+    com.example.auth: DEBUG
