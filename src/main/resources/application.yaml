@@ -75,3 +75,33 @@ logging:
   level:
     com.mengnankk: debug
     com.example.auth: DEBUG
+
+mq:
+  batch:
+    enabled: true       # 开启批量发送
+    size: 200           # 批量大小，范围[100, 300]
+    frequency: 2        # 发送频率，每2秒一次，范围[1, 5]
+  retry:
+    short_interval: 1   # 短期重试间隔（秒）
+    short_count: 3       # 短期重试次数
+    long_delays: "60,300,1800"  # 延迟队列延迟时间（秒） - 1分钟, 5分钟, 30分钟
+    max_expiration: 86400 # 最大过期时间（秒），24小时
+  compensation:
+    timeout: 30        # 补偿超时时间（秒）
+    scan_interval: 15    # 定时扫描间隔（分钟）
+    scan_limit: 500      # 每次扫描的消息数量
+  message:
+    record_retention: 7   # 消息记录保留天数
+  backlog:
+    threshold: 50000     # 消息积压阈值
+  dead_letter:
+    threshold: 500       # 死信队列阈值
+  security:
+    encryption: true      # 是否开启消息加密
+  filter:
+    default_type: "order_created,payment_success" # 默认MessageType过滤
+    default_priority: "1,2,3" # 默认Priority过滤
+  transaction:
+    timeout: 30 # 事务超时时间(秒)
+  binlog:
+    persist_interval: 60 # Binlog offset 持久化间隔(秒)
