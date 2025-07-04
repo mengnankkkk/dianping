@@ -1,15 +1,9 @@
-package com.mengnankk.untils;
+package com.mengnankk.utils;
 
-import cn.hutool.jwt.JWT;
-import cn.hutool.jwt.JWTUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SecurityException;
-import lombok.Data;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.ReactiveListCommands;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;

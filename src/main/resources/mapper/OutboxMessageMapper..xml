@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mengnankk.mapper.OutboxMessageMapper">
+
+    <select id="selectByStatus" resultType="com.mengnankk.entity.mq.OutboxMessage">
+        SELECT * FROM outbox_message WHERE status = #{status}
+    </select>
+
+</mapper>

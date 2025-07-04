@@ -1,4 +1,3 @@
-import cn.hutool.jwt.Claims;
 import com.mengnankk.dto.TokenResponse;
 import com.mengnankk.entity.Role;
 import com.mengnankk.entity.User;
@@ -8,7 +7,7 @@ import com.mengnankk.mapper.UserMapper;
 import com.mengnankk.service.BloomFilterService;
 import com.mengnankk.service.Impl.AliyunSmsService;
 import com.mengnankk.service.Impl.UserServiceImpl;
-import com.mengnankk.untils.JwtTokenUntils;
+import com.mengnankk.utils.JwtTokenUntils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
