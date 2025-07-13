@@ -5,8 +5,15 @@ import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.Resource;
+
+import static com.mengnankk.entity.mq.MQConstant.EXCHANGE_NAME;
+import static com.mengnankk.entity.mq.MQConstant.ROUTING_KEY;
+import static org.springframework.amqp.rabbit.core.RabbitAdmin.QUEUE_NAME;
 
 @Configuration
 public class RabbitMQConfig {
@@ -28,7 +35,7 @@ public class RabbitMQConfig {
 
     @Bean
     public DirectExchange shopUpdateExchange() {
-        return new DirectExchange(MQConstant.EXCHANGE_NAME);
+        return new DirectExchange(EXCHANGE_NAME);
     }
 
     @Bean
@@ -53,5 +60,21 @@ public class RabbitMQConfig {
         rabbitTemplate.setMandatory(true); // 可选：开启回调机制
         return rabbitTemplate;
     }
-    
+
+    @Bean("seckillQueue")
+    public Queue seckillQueue() {
+        return new Queue(QUEUE_NAME.toString(), true);
+
+    }
+
+    @Bean("directExchange")
+    public DirectExchange directExchange() {
+        return new DirectExchange(EXCHANGE_NAME, true, false);
+    }
+
+    @Bean
+    public Binding binding(@Qualifier("seckillQueue") Queue queue,
+                           @Qualifier("directExchange") DirectExchange directExchange) {
+        return BindingBuilder.bind(queue).to(directExchange).with(ROUTING_KEY);
+    }
 }
