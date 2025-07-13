@@ -1,6 +1,7 @@
 package com.mengnankk.service.Impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mengnankk.dto.Result;
 import com.mengnankk.dto.TokenResponse;
 import com.mengnankk.entity.Role;
 import com.mengnankk.entity.User;
@@ -10,6 +11,7 @@ import com.mengnankk.mapper.RoleMapper;
 import com.mengnankk.mapper.UserMapper;
 import com.mengnankk.service.BloomFilterService;
 import com.mengnankk.service.UserService;
+import com.mengnankk.utils.AuthContextHolder;
 import com.mengnankk.utils.JwtTokenUntils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -201,5 +205,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         redisTemplate.opsForValue().set(redisKey,refreshToken,refreshTokenExpirationMs,TimeUnit.SECONDS);
         log.info("User {} logged in, Refresh Token stored in Redis. Key: {}", user.getId(), redisKey);
         return new TokenResponse(accessToken, refreshToken, "Bearer", jwtUtils.getAccessTokenExpirationMs());
+    }
+    /**
+     * 签到方法
+     * @return
+     */
+    @Override
+    public Result sign() {
+        Long userid = AuthContextHolder.getUserId();
+        LocalDateTime now = LocalDateTime.now();
+        String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));
+        String key = userid+keySuffix;
+        int dayOfMounth = now.getDayOfMonth();
+        redisTemplate.opsForValue().setBit(key,dayOfMounth-1,true);
+        return Result.ok("签到成功");
     }
 }
