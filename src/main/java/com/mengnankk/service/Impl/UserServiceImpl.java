@@ -17,6 +17,7 @@ import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private static final String REFRESH_TOKEN_KEY_PREFIX = "refresh_token:"; // Key: refresh_token:<userId> Value: <refreshTokenString>
     private static final String ACCESS_TOKEN_BLACKLIST_KEY_PREFIX = "blacklist:at:"; // Key: blacklist:at:<jti> Value: "true"
     private static final String REFRESH_TOKEN_BLACKLIST_KEY_PREFIX = "blacklist:rt:"; // Key: blacklist:rt:<jti> Value: "true"
+    private static final String USER_SIGN_KEY_PREFIX = "sign:";
 
 
     /**
@@ -219,5 +221,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         int dayOfMounth = now.getDayOfMonth();
         redisTemplate.opsForValue().setBit(key,dayOfMounth-1,true);
         return Result.ok("签到成功");
+    }
+    @Override
+    public int calculateContinuousSignDays(Long userId){
+        LocalDateTime now = LocalDateTime.now();
+        String key = USER_SIGN_KEY_PREFIX+userId+":"+now.format(DateTimeFormatter.ofPattern("yyyyMM"));
+        int dayofMonth = now.getDayOfMonth();
+
+        List<Long> result = this.redisTemplate.opsForValue().bitField(
+                key, BitFieldSubCommands.create().get(BitFieldSubCommands.BitFieldType.unsigned(dayofMonth)).valueAt(0)
+
+        );
+        if (result==null||result.isEmpty()){
+            return 0;
+        }
+        Long num = result.get(0);
+        if (num==null){
+            return 0;
+        }
+        int count = 0;
+        while((num&1)!=0){
+            count++;
+            num>>>=1;
+        }
+        return count;
     }
 }

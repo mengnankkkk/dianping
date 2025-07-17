@@ -15,4 +15,6 @@ public interface UserService extends IService<User> {
     public TokenResponse login(String identifier, String password);
 
     Result sign();
+
+    int calculateContinuousSignDays(Long userId);
 }

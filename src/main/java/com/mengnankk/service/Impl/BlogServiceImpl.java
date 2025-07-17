@@ -16,15 +16,13 @@ import com.mengnankk.service.BlogService;
 import com.mengnankk.service.FollowService;
 import com.mengnankk.service.UserService;
 import com.mengnankk.utils.AuthContextHolder;
+import com.mengnankk.utils.LayeredBlogCache;
 import com.mengnankk.utils.RedisConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -47,6 +45,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
     private final ObjectMapper objectMapper;
     @Autowired
     private final FollowService followService;
+    @Autowired
+    private final LayeredBlogCache layeredBlogCache;
+
+    private static final int TOP_N = 5;
 
 
     private String getBlogKey(long blogid){
@@ -57,11 +59,12 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
         if (userId==0) return;
     }
 
-    public BlogServiceImpl(UserService userService, StringRedisTemplate redisTemplate, ObjectMapper objectMapper, FollowService followService) {
+    public BlogServiceImpl(UserService userService, StringRedisTemplate redisTemplate, ObjectMapper objectMapper, FollowService followService, LayeredBlogCache layeredBlogCache) {
         this.userService = userService;
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
         this.followService = followService;
+        this.layeredBlogCache = layeredBlogCache;
     }
 
 
@@ -274,46 +277,70 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
      * @return
      */
     @Override
-    public Result queryBlogLikes(Long id){
-        String key = "blog:likes:" + id;
-        String cachelikes = redisTemplate.opsForValue().get(key);
+    public Result<List<UserDTO>> queryBlogLikes(Long id) {
+        // 1. 尝试从缓存获取数据
+        List<UserDTO> userDTOList = layeredBlogCache.getCachedLikedUsers(id);
 
-        List<UserDTO> userDTOList;
+        if (userDTOList == null || userDTOList.isEmpty()) {
+            userDTOList = loadFromDbAndCache(id);
+        }
 
-        if (StrUtil.isNotBlank(cachelikes)){
-            try{
-                userDTOList =Arrays.asList(objectMapper.readValue(cachelikes,UserDTO.class));
-                log.info("Fetched blog likes from cache for blog ID: {}", id);
-                return Result.ok(userDTOList);
-            }catch (JsonProcessingException e){
-                log.error("Failed to deserialize blog likes for blog ID: {}. Fetching from DB and rewriting cache.", id, e);
+        return Result.ok(userDTOList);
+    }
+
+    private List<UserDTO> loadFromDbAndCache(Long id){
+        return (List<UserDTO>) redisTemplate.execute((RedisCallback<Object>) con->{
+            String likedkey = "blog:liked:"+id;
+            Set<String> topNuserids= loadTopNLikedUserFromDb(id);
+
+            if (topNuserids!=null&&!topNuserids.isEmpty()){
+                List<Long > ids=  topNuserids.stream().map(Long::valueOf).collect(Collectors.toList());
+                List<UserDTO> userDTOList  = getUserDTOsFromDB(ids);
+                layeredBlogCache.putCachedLikedUsers(id,userDTOList);
+
+                if (userDTOList.isEmpty()){
+                    log.warn("No likes found for blog id {}  and topNUserIds {} from database! Caching empty list!", id, topNuserids);
+                    layeredBlogCache.putCachedLikedUsers(id,Collections.emptyList());
+                }
+                return userDTOList;
+            }else {
+                log.warn("No likes found for blog id {} from (redis) database! Caching empty list!", id);
+                layeredBlogCache.putCachedLikedUsers(id,Collections.emptyList());
+                return Collections.emptyList();
             }
-        }
-        String likedKey = "blog:like"+id;
-        Set<String> top5 = redisTemplate.opsForZSet().range(likedKey,0,4);
-        if (CollectionUtils.isEmpty(top5)){
-            log.info("No likes found for blog ID: {}. Returning empty list.", id);
-            return Result.ok(Collections.emptyList());
-        }
+        });
+    }
+    /**
+     * 从redis中查询
+     * @param id
+     * @return
+     */
+    private Set<String> loadTopNLikedUserFromDb(Long id){
+         String likedKey = "blog:liked" + id;
+         return redisTemplate.opsForZSet().range(likedKey,0,TOP_N-1);
+    }
 
-        List<Long> ids = top5.stream().map(Long::valueOf).collect(Collectors.toList());
+    /**
+     * 从数据库中查询
+     * @param ids
+     * @return
+     */
+    private List<UserDTO> getUserDTOsFromDB(List<Long> ids){
         String idStr = StrUtil.join(",",ids);
-        Map<Long, User> userMap = userService.listByIds(ids)
-                .stream().collect(Collectors.toMap(User::getId, Function.identity()));
-
-        List<UserDTO> dblist = userService.list(new LambdaQueryWrapper<User>()
-                .in(User::getId,ids)
-                .last("order by fiel(id,"+idStr+")"))
+        if (StrUtil.isNotBlank(idStr)){
+            return Collections.emptyList();
+        }
+        return userService.list(new LambdaQueryWrapper<User>().in(User::getId,ids).last("order by field(id," + idStr + ")"))
                 .stream().map(user -> BeanUtil.copyProperties(user,UserDTO.class))
                 .collect(Collectors.toList());
+    }
 
-        try {
-            redisTemplate.opsForValue().set(key,objectMapper.writeValueAsString(dblist));
-        }catch (JsonProcessingException e){
-            log.error("Failed to serialize and cache blog likes for blog ID: {}", id, e);
-        }
-        log.info("Fetched blog likes from DB for blog ID: {}", id);
-        return Result.ok(dblist);
+    /**
+     * 清理缓存
+     * @param blogId
+     */
+    private void invalidateBlogLikes(Long blogId){
+        layeredBlogCache.invalidate(blogId);
     }
 
 
