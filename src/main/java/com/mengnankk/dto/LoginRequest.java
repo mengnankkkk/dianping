@@ -1,10 +1,9 @@
 package com.mengnankk.dto;
 
 import lombok.Data;
-import org.aspectj.weaver.AjcMemberMaker;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 @Data
 public class LoginRequest {

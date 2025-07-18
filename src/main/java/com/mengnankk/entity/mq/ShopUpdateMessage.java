@@ -2,13 +2,13 @@ package com.mengnankk.entity.mq;
 
 import com.mengnankk.entity.Shop;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.awt.*;
-import java.io.Serializable;
 import java.util.Map;
 
 @Data
-public class ShopUpdateMessage extends BaseMessage implements Serializable {
+@EqualsAndHashCode(callSuper=false)
+public class ShopUpdateMessage extends BaseMessage {
     private String messageId; // 全局唯一消息ID，由生产者生成
     private Long shopId;      // 更新的店铺ID
     private Shop shopData;    // 更新后的店铺完整数据或部分字段

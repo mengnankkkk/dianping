@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import static com.mengnankk.entity.mq.MQConstant.EXCHANGE_NAME;
 import static com.mengnankk.entity.mq.MQConstant.ROUTING_KEY;

@@ -13,14 +13,30 @@ public class Result<T> {  //  添加类型参数 <T>
     private String errorMsg;
 
     public static <T> Result<T> ok(T data) {  // 添加泛型方法，保证不同static方法返回值一致
-        return new Result<>(true, data, null);
+        Result<T> result = new Result<>();
+        result.setSuccess(true);
+        result.setData(data);
+        result.setErrorMsg(null);
+        return result;
     }
 
     public static <T> Result<T> ok() {  // 添加泛型方法，保证不同static方法返回值一致
-        return new Result<>(true, null, null);
+        Result<T> result = new Result<>();
+        result.setSuccess(true);
+        result.setData(null);
+        result.setErrorMsg(null);
+        return result;
     }
 
     public static <T> Result<T> fail(String errorMsg) {  // 添加泛型方法，保证不同static方法返回值一致
-        return new Result<>(false, null, errorMsg);
+        Result<T> result = new Result<>();
+        result.setSuccess(false);
+        result.setData(null);
+        result.setErrorMsg(errorMsg);
+        return result;
+    }
+    
+    public boolean isSuccess() {
+        return success;
     }
 }

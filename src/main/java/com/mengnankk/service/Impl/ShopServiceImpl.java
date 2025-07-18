@@ -171,6 +171,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements Sh
         );
     }
 
+    @Override
+    public List<Shop> searchByName(String query) {
+        return null;
+    }
+
     /**
      * 尝试获取锁和释放锁
      * @param key
