@@ -1,11 +1,7 @@
 package com.mengnankk.entity.ai;
 
-
-
 import lombok.Data;
 import lombok.Builder;
-
-import javax.xml.stream.Location;
 import java.util.Map;
 
 @Data
@@ -20,7 +16,7 @@ public class AgentContext {
     /**
      * 用户位置
      */
-    private Location location;
+    private String location;
 
     /**
      * 用户偏好

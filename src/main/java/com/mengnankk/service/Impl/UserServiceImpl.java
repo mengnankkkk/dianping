@@ -89,7 +89,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setStatus("ACTIVE"); // 默认激活状态
         user.setRegistrationTime(new Timestamp(System.currentTimeMillis()));
 
-        userMapper.insertUser(user);
+        // 插入用户
+        userMapper.insert(user);
         log.info("Registered new user: {}", user.getUsername());
 
         Role defaultRole = roleMapper.findByName("USER");
@@ -134,7 +135,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.warn("User ID {} not found in Bloom Filter. Possible invalid ID or non-existent user (cache penetration attempt).", userId);
             throw new ResourceNotFoundException("该用户不存在(Bloom Filter)");
         }
-        User user = userMapper.findById(userId);
+        User user = userMapper.selectById(userId);
         if (user == null) {
             log.warn("User ID {} found in Bloom Filter but not in DB. Bloom filter false positive or DB inconsistency.", userId);
             throw new ResourceNotFoundException("用户不存在");
@@ -245,5 +246,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             num>>>=1;
         }
         return count;
+    }
+
+    @Override
+    public Result<?> signCount() {
+        // TODO: 实现查询连续签到天数逻辑
+        Long userId = AuthContextHolder.getUserId();
+        if (userId == null) {
+            return Result.fail("用户未登录");
+        }
+        
+        int continuousDays = calculateContinuousSignDays(userId);
+        return Result.ok(continuousDays);
     }
 }

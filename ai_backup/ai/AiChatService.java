@@ -1,7 +1,6 @@
 package com.mengnankk.service.ai;
 
-import org.checkerframework.checker.units.qual.A;
-import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +16,11 @@ import org.slf4j.LoggerFactory;
 public class AiChatService {
     
     private static final Logger log = LoggerFactory.getLogger(AiChatService.class);
-    @Autowired
-    private final OpenAiChatModel chatModel;
+    
+    private final ChatModel chatModel;
     
     @Autowired
-    public AiChatService(OpenAiChatModel chatModel) {
+    public AiChatService(ChatModel chatModel) {
         this.chatModel = chatModel;
     }
     

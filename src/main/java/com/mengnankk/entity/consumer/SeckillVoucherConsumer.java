@@ -1,11 +1,9 @@
 package com.mengnankk.entity.consumer;
 
-import com.mengnankk.config.RabbitMQConfig;
 import com.mengnankk.entity.CouponReceiveLog;
 import com.mengnankk.service.CouponService;
 import com.mengnankk.utils.MessageRetryHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.security.oauthbearer.internals.secured.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -19,8 +17,6 @@ public class SeckillVoucherConsumer {
     private CouponService couponService;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private RabbitMQConfig rabbitMQConfig;
     @Autowired
     private MessageRetryHandler messageRetryHandler;
 

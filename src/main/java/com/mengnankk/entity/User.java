@@ -3,14 +3,11 @@ package com.mengnankk.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.sleepycat.persist.model.Entity;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-@Entity
 @Data
 @TableName("tb_user")
 public class User {
@@ -28,6 +25,6 @@ public class User {
 
     private String username;
 
-    private String  status;
+    private String status;
 
 }

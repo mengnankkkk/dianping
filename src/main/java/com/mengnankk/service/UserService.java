@@ -14,7 +14,9 @@ public interface UserService extends IService<User> {
     boolean isTokenBlacklisted(String jti);
     public TokenResponse login(String identifier, String password);
 
-    Result sign();
+    Result<?> sign();
+    
+    Result<?> signCount();
 
     int calculateContinuousSignDays(Long userId);
 }

@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <spring-ai.version>1.0.0-M4</spring-ai.version>
+        <spring-ai-alibaba.version>1.0.0-M3.2</spring-ai-alibaba.version>
     </properties>
 
     <repositories>
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.5</version>
+            <version>3.5.3.1</version>
         </dependency>
         <!--hutool-->
         <dependency>
@@ -214,40 +214,56 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Spring AI Dependencies (Compatible versions) -->
+        <!-- Spring AI Dependencies (Compatible versions) - 暂时注释掉解决启动问题 -->
+        <!--
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-core</artifactId>
             <version>${spring-ai.version}</version>
         </dependency>
+        -->
         
-        <!-- DashScope SDK for Alibaba AI -->
+        <!-- DashScope SDK for Alibaba AI - 暂时注释掉解决启动问题 -->
+        <!--
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dashscope-sdk-java</artifactId>
             <version>2.12.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        -->
 
-        <!-- Spring AI OpenAI (更稳定的选择) -->
+        <!-- Spring AI OpenAI (更稳定的选择) - 暂时注释掉解决启动问题 -->
+        <!--
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-openai</artifactId>
             <version>${spring-ai.version}</version>
         </dependency>
+        -->
 
-        <!-- Spring AI PGVector Store 支持(向量存储) -->
+        <!-- Spring AI PGVector Store 支持(向量存储) - 暂时注释掉解决启动问题 -->
+        <!--
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-pgvector-store</artifactId>
             <version>${spring-ai.version}</version>
         </dependency>
+        -->
 
-        <!-- Spring AI Transformers for embeddings -->
+        <!-- Spring AI Transformers for embeddings - 暂时注释掉解决启动问题 -->
+        <!--
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-transformers</artifactId>
             <version>${spring-ai.version}</version>
         </dependency>
+        -->
 
         <!-- Jakarta EE annotations for Spring Boot 3.x -->
         <dependency>
@@ -262,19 +278,32 @@
         </dependency>
 
         <!-- SLF4J Logging for consistent logging API -->
+        <!-- Spring Boot Starter already includes SLF4J API and Logback -->
+        <!-- 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        -->
+        <!--
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
             <version>1.0.0.2</version>
         </dependency>
+        -->
 
+        <!-- WebSocket 支持 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
 
-
-
+        <!-- Spring Security WebSocket 支持 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-messaging</artifactId>
+        </dependency>
 
     </dependencies>
 

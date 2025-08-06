@@ -174,4 +174,17 @@ private final ObjectMapper objectMapper;
         return Result.ok(dbList);
     }
 
+    @Override
+    public Result<?> getMyFollows(Integer current) {
+        // TODO: 实现查询我的关注列表逻辑
+        // 这里应该分页查询当前用户关注的用户列表
+        return Result.ok("暂未实现");
+    }
+
+    @Override
+    public Result<?> getMyFans(Integer current) {
+        // TODO: 实现查询我的粉丝列表逻辑
+        // 这里应该分页查询关注当前用户的粉丝列表
+        return Result.ok("暂未实现");
+    }
 }

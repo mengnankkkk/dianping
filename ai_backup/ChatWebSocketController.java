@@ -11,6 +11,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
+import java.util.Map;
+
 @Controller
 @RequiredArgsConstructor
 @Slf4j
@@ -28,8 +30,16 @@ public class ChatWebSocketController {
     @MessageMapping("/chat.send")
     @SendTo("/topic/chat")
     public Object sendMessage(Message message, SimpMessageHeaderAccessor headerAccessor){
-        String sessionId = (String) headerAccessor.getSessionAttributes().get("sessionId");
-        String userId = (String) headerAccessor.getSessionAttributes().get("userId");
+        Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
+        if (sessionAttributes == null) {
+            log.error("Session attributes is null");
+            return Message.builder()
+                    .content("会话信息丢失，请重新连接。")
+                    .build();
+        }
+        
+        String sessionId = (String) sessionAttributes.get("sessionId");
+        String userId = (String) sessionAttributes.get("userId");
 
         try {
             ChatContext context = ChatContext.builder()
@@ -38,14 +48,15 @@ public class ChatWebSocketController {
                     //.location(message.getLocation())
                     .build();
 
-            ChatResponse response =chatService.sendMessage(sessionId,message.getContent(),context);
+            ChatResponse response = chatService.sendMessage(sessionId, message.getContent(), context);
             return Message.builder()
                     .content(response.getResult().getOutput().getContent())
                     .build();
         }catch (Exception e){
             log.error("Error processing chat message: {}", e.getMessage(), e);
             return Message.builder()
-                    .content("抱歉，我现在无法回答您的问题，请稍后重试。");
+                    .content("抱歉，我现在无法回答您的问题，请稍后重试。")
+                    .build();
         }
     }
 
@@ -55,16 +66,24 @@ public class ChatWebSocketController {
      * @param headerAccessor
      * @return
      */
-    @MessageMapping("/agnet.call")
+    @MessageMapping("/agent.call")
     @SendTo("/topic/agent")
-    public AgentResponse callAgent(AgentRequest request,SimpMessageHeaderAccessor headerAccessor){
-        String userId = (String) headerAccessor.getSessionAttributes().get("userId");
+    public AgentResponse callAgent(AgentRequest request, SimpMessageHeaderAccessor headerAccessor){
+        Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
+        if (sessionAttributes == null) {
+            log.error("Session attributes is null");
+            return AgentResponse.builder()
+                    .success(false)
+                    .message("会话信息丢失，请重新连接。")
+                    .build();
+        }
+        
+        String userId = (String) sessionAttributes.get("userId");
 
         try {
-            //加载agnet
-            AiAgent aiAgent = null;
+            // 使用 ShopAgent 处理请求
             request.getContext().setUserId(Long.valueOf(userId));
-            return aiAgent.execute(request);
+            return shopAiagnt.execute(request);
         }catch (Exception e){
             log.error("Error calling agent {}: {}", request.getRequestId(), e.getMessage(), e);
             return AgentResponse.builder()
