@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.TimeoutUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -238,9 +238,11 @@ public class ShopSearchService {
                 SearchHit lasthit = searchResponse.getHits().getHits()[shops.size() - 1];
                 nextSearchAfter = lasthit.getSortValues();
             }
-            SearchResult<Shop> result = new SearchResult<>();
-            result.setItems(shops);
-            result.setNextSearchAfter(nextSearchAfter);
+            SearchResult<Shop> result = SearchResult.<Shop>builder()
+                    .results(shops)
+                    .nextSearchAfter(nextSearchAfter)
+                    .total(shops.size())
+                    .build();
             return result;
         } catch (IOException e) {
             log.info("使用 search_after 搜索店铺时发生IO异常", e);

@@ -343,6 +343,21 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
         layeredBlogCache.invalidate(blogId);
     }
 
+    @Override
+    public Result<?> queryMyBlog(Integer current) {
+        // TODO: 实现查询我的博客逻辑
+        return Result.ok("暂未实现");
+    }
 
+    @Override
+    public Result<?> queryBlogByUserId(Long userId, Integer current) {
+        // TODO: 实现根据用户ID查询博客逻辑
+        return Result.ok("暂未实现");
+    }
 
+    @Override
+    public Result<?> queryHotBlog(Integer current) {
+        // TODO: 实现查询热门博客逻辑
+        return Result.ok("暂未实现");
+    }
 }

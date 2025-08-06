@@ -1,19 +1,21 @@
 package com.mengnankk;
 
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 
-@EnableAspectJAutoProxy(exposeProxy = true)
+@SpringBootApplication(exclude = {
+    ElasticsearchDataAutoConfiguration.class,
+    RabbitAutoConfiguration.class
+})
 @MapperScan("com.mengnankk.mapper")
-@EnableRabbit
-@SpringBootApplication
 public class Application {
     public static void main(String[] args) {
+        // 暂时禁用Spring AI自动配置来排查问题
+        System.setProperty("spring.ai.autoconfigure.enabled", "false");
         SpringApplication.run(Application.class, args);
     }
-
 }
 

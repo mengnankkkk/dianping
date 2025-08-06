@@ -6,8 +6,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.security.Key;
+import jakarta.annotation.PostConstruct;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +21,7 @@ public class JwtTokenUntils {
     @Value("${jwt.refresh-token-expiration-ms}")
     private long refreshTokenExpirationMs;
 
-    private Key key;
+    private SecretKey key;
 
     /**
      * 初始化base64密钥
@@ -42,15 +42,37 @@ public class JwtTokenUntils {
     public String generateAccessToken(Long userId, String username, List<String> roles,List<String> permissions) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenExpirationMs);
+        String jti = UUID.randomUUID().toString();
 
         return Jwts.builder()
-                .setSubject(Long.toString(userId))
+                .subject(Long.toString(userId))
+                .id(jti)
                 .claim("username", username)
                 .claim("roles", roles)
                 .claim("permissions", permissions)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.ES256)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
+    }
+
+    /**
+     * 生成AccessToken（带字符串参数）
+     */
+    public String generateAccessToken(String userId, String username, String roles, String permissions) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + accessTokenExpirationMs);
+        String jti = UUID.randomUUID().toString();
+
+        return Jwts.builder()
+                .subject(userId)
+                .id(jti)
+                .claim("username", username)
+                .claim("roles", roles)
+                .claim("permissions", permissions)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
                 .compact();
     }
 
@@ -60,34 +82,63 @@ public class JwtTokenUntils {
      * @param userId
      * @return
      */
-
-
     public String generateRefreshToken(Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshTokenExpirationMs);
         String jti = UUID.randomUUID().toString();
 
         return Jwts.builder()
-                .setSubject(Long.toString(userId))
-                .setId(jti)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .subject(Long.toString(userId))
+                .id(jti)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
+    }
+
+    /**
+     * 生成RefreshToken（带字符串参数）
+     */
+    public String generateRefreshToken(String userId, String username, String roles, String permissions) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + refreshTokenExpirationMs);
+        String jti = UUID.randomUUID().toString();
+
+        return Jwts.builder()
+                .subject(userId)
+                .id(jti)
+                .claim("username", username)
+                .claim("roles", roles)
+                .claim("permissions", permissions)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
                 .compact();
     }
 
     public Claims getClaimsFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(key)
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    /**
+     * 检查token是否过期
+     */
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = getClaimsFromToken(token);
+            return claims.getExpiration().before(new Date());
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     public boolean validateToken(String token) {
-
         try {
-            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
         } catch (MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException e) {
             return false;

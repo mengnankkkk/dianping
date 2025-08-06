@@ -7,6 +7,7 @@ public class MQConstant {
     public static final String QUEUE_BASIC_INFO = "shop.update.basic_info.queue";
     public static final String QUEUE_INVENTORY = "shop.update.inventory.queue";
     public static final String QUEUE_PRICE = "shop.update.price.queue";
+    public static final String QUEUE_SECKILL = "seckill.queue";
     // 路由键
     public static final String ROUTING_KEY = "shop.update";
     // 死信交换机名称
